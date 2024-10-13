@@ -87,73 +87,47 @@ agent = OpenAIAgent.from_tools(tools, llm=llm, verbose=True)
 # print(response)
 
 response = agent.chat('''
-Property Details:
-Address: 303 S Ridge St, Dallas, NC
-County: Gaston County
-Lot Dimensions: Width = 80 feet, Length = 200 feet
-Zoning: R-8 Residential
-Purchase Price: 50,000
-Instructions:
-Calculate the Maximum Number of Residential Units:
+You are an assistant that provides real estate development analyses.
 
-If specific zoning parameters are provided (e.g., density limits, minimum lot area per unit, setback requirements):
+**Property Details:**
 
-Use these parameters to calculate the maximum number of residential units that can be built on the lot according to the R-8 zoning regulations of Gaston County.
-If specific zoning parameters are not provided:
+- **Address**: 303 S Ridge St, Dallas, NC
+- **County**: Gaston County
+- **Lot Dimensions**: Width = 80 feet, Length = 200 feet
+- **Zoning**: R-8 Residential
+- **Purchase Price**: $50,000
 
-Search for and retrieve the missing zoning parameters from reliable sources (e.g., Gaston County zoning ordinances, official county websites).
-Use the retrieved information to estimate the maximum number of units that can be built.
-Consider all relevant zoning restrictions, including:
+**Instructions:**
 
-Density limits (e.g., maximum units per acre)
-Minimum lot area per unit
-Setback requirements
-Lot width and depth requirements
-Any other pertinent zoning ordinances
-Assess if It's a Good Deal:
+1. **Calculate the Maximum Number of Residential Units:**
 
-Calculate the Minimum Gross Sale Value using the formula:
+   - Since specific zoning parameters are not provided, search for and retrieve the missing zoning parameters from reliable sources.
+   - Use these parameters to estimate the maximum number of residential units that can be built.
+   - Consider all relevant zoning restrictions.
 
-Minimum Gross Sale Value = Purchase Price / 0.20 (representing 20% equity)
-Determine the average sales price of properties in the area of the specified address:
+2. **Assess if It's a Good Deal:**
 
-Search for and retrieve the average sales price data from reliable sources (e.g., real estate databases, recent sales records, market analysis reports).
-Compare the Minimum Gross Sale Value to the average area sales price.
+   - Calculate the Minimum Gross Sale Value: $50,000 / 0.20 = $250,000.
+   - Search for and retrieve the average sales price of properties in the area.
+   - Compare the Minimum Gross Sale Value to the average area sales price.
+   - Conclude whether the investment is a good deal.
 
-Conclude whether the investment is a good deal:
+3. **Output Format:**
 
-If the Minimum Gross Sale Value is less than or equal to the average area sales price, Good Deal = Yes
-Otherwise, Good Deal = No
-Output Format:
+   - Provide the final answer **only** in JSON format as specified below, without any additional text.
 
-Number of Units: [Number or 'none']
+```json
+{
+  "number_of_units": [Number or "none"],
+  "reasoning": "[Your reasoning here]",
+  "good_deal_assessment": "[Yes or No]",
+  "explanation": "[Your explanation here]"
+}
+### **Final Notes:**
 
-Reasoning:
+- **Ethical Considerations**: Ensure that any data retrieved complies with data use policies and privacy laws.
 
-Calculations and reasoning for the number of units, including any zoning parameters found and how they were applied.
-Sources of the zoning information retrieved.
-Good Deal Assessment: [Yes or No]
+- **User Inputs**: Validate and sanitize all user inputs to prevent injection attacks or other security issues.
 
-Explanation:
-
-Calculations and reasoning behind the good deal assessment.
-Sources of the average sales price data retrieved.
-Example Output:
-Number of Units: 2
-
-Reasoning:
-
-Searched and found that R-8 zoning in Gaston County allows for a maximum density of 5 units per acre.
-The lot size is 16,000 sq ft (80 ft x 200 ft), which is approximately 0.367 acres.
-Maximum units = 0.367 acres x 5 units/acre ≈ 1.83 units, rounded down to 1 unit.
-Considering setback requirements and minimum lot size per unit, the lot can accommodate 1 unit.
-Sources: Gaston County Zoning Ordinance Section X.X.
-Good Deal Assessment: Yes
-
-Explanation:
-
-Minimum Gross Sale Value = $50,000 (Purchase Price) / 0.20 = $250,000.
-Average Sales Price in the area is $300,000, retrieved from recent sales data.
-Since $250,000 ≤ $300,000, this is considered a good deal.
-Sources: Real Estate Database XYZ, accessed on [Date].''')
+- **Agent Capabilities**: If the agent cannot access real-time data, adjust your approach to provide as much information as possible within the prompt.''')
 print(response)
