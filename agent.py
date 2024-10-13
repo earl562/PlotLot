@@ -1,5 +1,4 @@
 import os
-from getpass import getpass
 from llama_index.embeddings.openai import OpenAIEmbedding
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone import ServerlessSpec
@@ -32,7 +31,7 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 
 llm = OpenAI(model="gpt-4o")
 embed_model = OpenAIEmbedding()
-api_key = '6f3e21bd-05cf-44cb-86d4-4b74de6b8499'
+api_key = PINECONE_API_KEY
 pc = Pinecone(api_key=api_key)
 
 dims = len(embed_model.get_text_embedding("some random text"))
@@ -77,7 +76,6 @@ tools = [cmau,en,slva]
 tools.extend(tool_spec.to_tool_list())
 agent = OpenAIAgent.from_tools(tools, llm=llm, verbose=True)
 
-# set Logging to DEBUG for more detailed outputs
 # query_engine = index.as_query_engine()
 # response = query_engine.query("""
 #                               property: 303 s ridge st dallas nc
@@ -88,5 +86,74 @@ agent = OpenAIAgent.from_tools(tools, llm=llm, verbose=True)
 #                               """)
 # print(response)
 
-response = agent.chat('''Create a rezoning variance proposal that I can take to gaston counties clerk of court to submit a rezoning variance''')
+response = agent.chat('''
+Property Details:
+Address: 303 S Ridge St, Dallas, NC
+County: Gaston County
+Lot Dimensions: Width = 80 feet, Length = 200 feet
+Zoning: R-8 Residential
+Purchase Price: 50,000
+Instructions:
+Calculate the Maximum Number of Residential Units:
+
+If specific zoning parameters are provided (e.g., density limits, minimum lot area per unit, setback requirements):
+
+Use these parameters to calculate the maximum number of residential units that can be built on the lot according to the R-8 zoning regulations of Gaston County.
+If specific zoning parameters are not provided:
+
+Search for and retrieve the missing zoning parameters from reliable sources (e.g., Gaston County zoning ordinances, official county websites).
+Use the retrieved information to estimate the maximum number of units that can be built.
+Consider all relevant zoning restrictions, including:
+
+Density limits (e.g., maximum units per acre)
+Minimum lot area per unit
+Setback requirements
+Lot width and depth requirements
+Any other pertinent zoning ordinances
+Assess if It's a Good Deal:
+
+Calculate the Minimum Gross Sale Value using the formula:
+
+Minimum Gross Sale Value = Purchase Price / 0.20 (representing 20% equity)
+Determine the average sales price of properties in the area of the specified address:
+
+Search for and retrieve the average sales price data from reliable sources (e.g., real estate databases, recent sales records, market analysis reports).
+Compare the Minimum Gross Sale Value to the average area sales price.
+
+Conclude whether the investment is a good deal:
+
+If the Minimum Gross Sale Value is less than or equal to the average area sales price, Good Deal = Yes
+Otherwise, Good Deal = No
+Output Format:
+
+Number of Units: [Number or 'none']
+
+Reasoning:
+
+Calculations and reasoning for the number of units, including any zoning parameters found and how they were applied.
+Sources of the zoning information retrieved.
+Good Deal Assessment: [Yes or No]
+
+Explanation:
+
+Calculations and reasoning behind the good deal assessment.
+Sources of the average sales price data retrieved.
+Example Output:
+Number of Units: 2
+
+Reasoning:
+
+Searched and found that R-8 zoning in Gaston County allows for a maximum density of 5 units per acre.
+The lot size is 16,000 sq ft (80 ft x 200 ft), which is approximately 0.367 acres.
+Maximum units = 0.367 acres x 5 units/acre ≈ 1.83 units, rounded down to 1 unit.
+Considering setback requirements and minimum lot size per unit, the lot can accommodate 1 unit.
+Sources: Gaston County Zoning Ordinance Section X.X.
+Good Deal Assessment: Yes
+
+Explanation:
+
+Minimum Gross Sale Value = $50,000 (Purchase Price) / 0.20 = $250,000.
+Average Sales Price in the area is $300,000, retrieved from recent sales data.
+Since $250,000 ≤ $300,000, this is considered a good deal.
+Sources: Real Estate Database XYZ, accessed on [Date].''')
 print(response)
