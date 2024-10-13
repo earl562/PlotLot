@@ -8,9 +8,19 @@ from llama_index.core import (
     VectorStoreIndex, 
     SimpleDirectoryReader,
     StorageContext)
-
+from llama_index.agent.openai import OpenAIAgent
+from llama_index.llms.openai import OpenAI
+from llama_index.core.agent import AgentRunner
+from llama_index.core.tools import FunctionTool
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from dotenv import load_dotenv
+from tools import (
+    calculate_max_allowable_units,
+    extract_number,
+    streamline_variance_application
+
+)
+from IPython.display import display, Markdown, Latex
 
 load_dotenv()
 
@@ -23,6 +33,8 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 #     doc, storage_context=storage_context
 # )
 # batch size parameter aligns with Pinecone upsertion
+
+llm = OpenAI(model="gpt-4o")
 embed_model = OpenAIEmbedding()
 api_key = '6f3e21bd-05cf-44cb-86d4-4b74de6b8499'
 pc = Pinecone(api_key=api_key)
@@ -48,19 +60,27 @@ time.sleep(1)
 # # view index stats
 index.describe_index_stats()
 
-doc = SimpleDirectoryReader(input_files=['PlotLot/Sec._6.1___Zoning_districts_established..docx']).load_data()
+doc = SimpleDirectoryReader(input_files=['Sec._6.1___Zoning_districts_established.docx']).load_data()
 vector_store = PineconeVectorStore(pinecone_index=index)
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 index = VectorStoreIndex.from_documents(
     doc, storage_context=storage_context
 )
+cmau = FunctionTool.from_defaults(fn=calculate_max_allowable_units)
+en = FunctionTool.from_defaults(fn=extract_number)
+slva = FunctionTool.from_defaults(fn=streamline_variance_application)
+agent = OpenAIAgent.from_tools([cmau,en,slva], llm=llm, verbose=True)
+
 # set Logging to DEBUG for more detailed outputs
-query_engine = index.as_query_engine()
-response = query_engine.query("""
-                              property: 303 s ridge st dallas nc
-                              Width: 80
-                              Length: 200
-                              Zoning: I2
-                              Based on these property descriptions tell me what is the maximum allowable units for this lot
-                              """)
+# query_engine = index.as_query_engine()
+# response = query_engine.query("""
+#                               property: 303 s ridge st dallas nc
+#                               Width: 80
+#                               Length: 200
+#                               Zoning: I2
+#                               Based on these property descriptions tell me what is the maximum allowable units for this lot
+#                               """)
+# print(response)
+
+response = agent.chat('''Create a rezoning variance proposal that I can take to gaston counties clerk of court to submit a rezoning variance''')
 print(response)
